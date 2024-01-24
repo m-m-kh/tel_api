@@ -1,27 +1,32 @@
 import requests
 from bs4 import BeautifulSoup
+
+
+
+
+
+
 class GetApiIdApiHash:
-    send_password_url = 'https://my.telegram.org/auth/send_password'
-    login_url = 'https://my.telegram.org/auth/login'
-    create_api_url = 'https://my.telegram.org/apps/create'
-    app_url = 'https://my.telegram.org/apps'
-    request = requests.Session()
-    request.headers.update({'User-agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36 TelegramBot (like TwitterBot)'})
+    __send_password_url = 'https://my.telegram.org/auth/send_password'
+    __login_url = 'https://my.telegram.org/auth/login'
+    __create_api_url = 'https://my.telegram.org/apps/create'
+    __app_url = 'https://my.telegram.org/apps'
+    __request = requests.Session()
+    __request.headers.update({'User-agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36 TelegramBot (like TwitterBot)'})
     def __init__(self, number):
         # self.login_try = 0 
         self.number = number
-        r = self.request.post(self.send_password_url, data={'phone': self.number})
+        r = self.request.post(self.__send_password_url, data={'phone': self.number})
         self.random_hash = r.json()['random_hash']
         self.password = input('Enter recived password: ')
         
-    def login(self):
-        
+    def __login(self):
         data = {
             'phone': self.number,
             'random_hash': self.random_hash,
             'password': self.password
         }
-        login = self.request.post(self.login_url, data=data).text
+        login = self.__request.post(self.__login_url, data=data).text
         # print(login)
         # self.login_try += 1
         if login == 'Invalid confirmation code!':
@@ -33,8 +38,9 @@ class GetApiIdApiHash:
         else:
             return self
     
-    def create_api(self):
-        r = self.request.get(self.app_url)
+    def get_api_id_hash(self):
+        self.__login()
+        r = self.__request.get(self.__app_url)
         bs4 = BeautifulSoup(r.text, 'html.parser')
         hash = bs4.find('input',{'name':'hash'})['value']
         
@@ -42,11 +48,11 @@ class GetApiIdApiHash:
             'hash': hash,
             'app_title': 'pythonbot',
             'app_shortname': 'python',
-            'app_url': '',
+            '__': '',
             'app_platform' : 'desktop',
             'app_desc': '',
         }
-        r = self.request.post(self.create_api_url, data=data)
+        r = self.__request.post(self.__create_api_url, data=data)
         if r.text == 'ERROR':
             # print('error')
             self.create_api() 
