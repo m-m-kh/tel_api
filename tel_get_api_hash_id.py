@@ -15,24 +15,24 @@ class GetApiIdApiHash:
     __request.headers.update({'User-agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36 TelegramBot (like TwitterBot)'})
     def __init__(self, number):
         # self.login_try = 0 
-        self.number = number
-        r = self.request.post(self.__send_password_url, data={'phone': self.number})
-        self.random_hash = r.json()['random_hash']
-        self.password = input('Enter recived password: ')
+        self.__number = number
+        r = self.__request.post(self.__send_password_url, data={'phone': self.__number})
+        self.__random_hash = r.json()['random_hash']
+        self.__password = input('Enter recived password: ')
         
     def __login(self):
         data = {
-            'phone': self.number,
-            'random_hash': self.random_hash,
-            'password': self.password
+            'phone': self.__number,
+            'random_hash': self.__random_hash,
+            'password': self.__password
         }
         login = self.__request.post(self.__login_url, data=data).text
         # print(login)
         # self.login_try += 1
         if login == 'Invalid confirmation code!':
-            self.password = input('Invalid confirmation code!\nEnter recived password: ')
+            self.__password = input('Invalid confirmation code!\nEnter recived password: ')
             # print(self.login_try)
-            self.login()
+            self.__login()
         elif login == 'Sorry, too many tries. Please try again later.':
             return False
         else:
@@ -55,14 +55,12 @@ class GetApiIdApiHash:
         r = self.__request.post(self.__create_api_url, data=data)
         if r.text == 'ERROR':
             # print('error')
-            self.create_api() 
+            self.get_api_id_hash() 
         elif r.text == '':
             # print('ok')
-            self.create_api() 
+            self.get_api_id_hash() 
         else:
             bs4 = BeautifulSoup(r.text, 'html.parser')
             api_id = bs4.find_all('strong')[0].text
             api_hash = bs4.find_all('span')[2].text
             return {'api_id':api_id, 'api_hash':api_hash}
-
-        
